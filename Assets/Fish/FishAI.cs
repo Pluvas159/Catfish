@@ -1,4 +1,4 @@
-
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,6 +22,7 @@ public class FishAI : MonoBehaviour
     private Vector2 startingPosition;
     public float reverseDirectionDelay = 0.3f;
 
+    public event Action<FishAI> FishHooked = delegate { };
 
 
 
@@ -34,7 +35,6 @@ public class FishAI : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         neighbors = new List<FishAI>();
         wanderTarget = GetRandomWanderTarget();
-        HookController.hookRetracted.AddListener(IfHookedRemove);
     }
 
 
@@ -157,24 +157,6 @@ public class FishAI : MonoBehaviour
         }
     }
 
-    private void IfHookedRemove()
-    {
-        if (isHooked)
-        {
-            StartCoroutine(Respawn());
-        }
-    }
-
-    private IEnumerator Respawn()
-    {
-        gameObject.SetActive(false);
-        isHooked = false;
-        transform.SetParent(GameObject.Find("DanoHerd").transform);
-        yield return new WaitForSeconds(5);
-        transform.position = startingPosition;
-        gameObject.SetActive(true);
-    }
-
     void Update()
     {
         if (isInWater)
@@ -206,7 +188,7 @@ public class FishAI : MonoBehaviour
 
     private Vector2 GetRandomWanderTarget()
     {
-        float randomAngle = Random.Range(0, 360) * Mathf.Deg2Rad;
+        float randomAngle = UnityEngine.Random.Range(0, 360) * Mathf.Deg2Rad;
         Vector2 randomDirection = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
         Vector2 randomTarget = (Vector2)transform.position + randomDirection * wanderRadius;
         return randomTarget;
@@ -229,6 +211,12 @@ public class FishAI : MonoBehaviour
         rb.velocity = -rb.velocity;
     }
 
+    public bool IsHooked
+    {
+        get { return isHooked; }
+    }
+
+
 
     private void OnTriggerExit2D(Collider2D other)
     {
@@ -248,7 +236,7 @@ public class FishAI : MonoBehaviour
             isInWater = true;
         }
 
-        if (((1 << other.gameObject.layer) & hookLayer) != 0)
+        if (((1 << other.gameObject.layer) & hookLayer) != 0 && other.gameObject.transform.childCount == 1)
         {
             // Hook the fish
             transform.SetParent(other.transform);
@@ -256,8 +244,23 @@ public class FishAI : MonoBehaviour
             isHooked = true;
             // Disable the FishAI script when hooked
             this.enabled = false;
-            transform.position = other.transform.position;
+            //transform.position = other.transform.position;
+
+            // Invoke the FishHooked event
+            FishHooked?.Invoke(this);
         }
+    }
+
+    public void Reinitialize()
+    {
+        isHooked = false;
+        this.enabled = true;
+        rb.isKinematic = false;
+    }
+
+    public Vector2 StartingPosition
+    {
+        get { return startingPosition; }
     }
 
 
