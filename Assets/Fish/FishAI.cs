@@ -1,141 +1,123 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class FishAI : MonoBehaviour
 {
-    public float speed = 2f;
-    public float maxForce = 2f;
-    public float neighborRadius = 1f;
-    public float separationWeight = 1.5f;
-    public float cohesionWeight = 1f;
-    public float alignmentWeight = 1f;
-    public float wanderRadius = 5f;
-    public float wanderWeight = 0.5f;
-    private Vector2 wanderTarget;
+    [SerializeField]
+    private float speed = 0.5f;
+
+[SerializeField]
+    private float rectangleWidth = 50;
+    [SerializeField]
+    private float rectangleHeight = 20;
     private bool rotated;
-    public LayerMask waterLayer;
-    public LayerMask hookLayer;
+    [SerializeField]
+    private LayerMask waterLayer;
+    [SerializeField]
+    private LayerMask hookLayer;
     private bool isInWater = true;
     private bool isHooked = false;
-    private Vector2 startingPosition;
-    public float reverseDirectionDelay = 0.3f;
+    public Vector2 startingPosition { get; set; }
+    private Vector2 targetPosition;
+    [SerializeField]
+    private LayerMask hook;
+    [SerializeField]
+    private float hookCheckRadius = 100f;
 
+    [SerializeField] private float neighbourRadius = 5f;
+    [SerializeField] private float separationWeight = 1.5f;
+    [SerializeField] private float alignmentWeight = 1f;
+    [SerializeField] private float cohesionWeight = 1f;
+    [SerializeField] private float wanderWeight = 1f;
+
+     private HerdManager herdManager;
+     private List<FishAI> neighbours = new List<FishAI>();
     public event Action<FishAI> FishHooked = delegate { };
 
 
 
 
+
+
+
     private Rigidbody2D rb;
-    private List<FishAI> neighbors;
     void Start()
     {
+        herdManager = GetComponentInParent<HerdManager>();
         startingPosition = transform.position;
+        targetPosition = Vector2.zero;
         rb = GetComponent<Rigidbody2D>();
-        neighbors = new List<FishAI>();
-        wanderTarget = GetRandomWanderTarget();
     }
 
-
-    private Vector2 Separation()
+    private bool IsHookNearby()
     {
-        Vector2 steer = Vector2.zero;
-        int count = 0;
-
-        foreach (FishAI neighbor in neighbors)
+        Collider2D nearbyHook = Physics2D.OverlapCircle(transform.position, hookCheckRadius, hookLayer);
+        if (nearbyHook)
         {
-            float distance = Vector2.Distance(transform.position, neighbor.transform.position);
-            if (distance < neighborRadius)
-            {
-                Vector2 direction = (Vector2)(transform.position - neighbor.transform.position);
-                steer += direction.normalized / distance;
-                count++;
-            }
+            return true;
         }
-
-        if (count > 0)
-        {
-            steer /= count;
-        }
-
-        if (steer.magnitude > maxForce)
-        {
-            steer = steer.normalized * maxForce;
-        }
-
-        return steer;
+        return false;
     }
 
-    /*private void OnDrawGizmos()
+    public void CheckForHook()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, neighborRadius);
-        Gizmos.DrawLine(transform.position,transform.position + transform.up * 3);
-    }*/
-
-    private Vector2 Cohesion()
-    {
-        Vector2 center = Vector2.zero;
-        int count = 0;
-
-        foreach (FishAI neighbor in neighbors)
+        if (isHooked) return;
+        bool hookNearby = IsHookNearby();
+        if (!hookNearby && gameObject.activeSelf)
         {
-            float distance = Vector2.Distance(transform.position, neighbor.transform.position);
-            if (distance < neighborRadius)
-            {
-                center += (Vector2)neighbor.transform.position;
-                count++;
-            }
+            gameObject.SetActive(false);
+        }
+        else if (!gameObject.activeSelf && hookNearby)
+        {
+            gameObject.SetActive(true);
         }
 
-        if (count > 0)
-        {
-            center /= count;
-            Vector2 direction = center - (Vector2)transform.position;
-            return direction.normalized * speed;
-        }
-
-        return Vector2.zero;
     }
 
-    private Vector2 Alignment()
+    private void GetNewTargetPosition()
+{
+    targetPosition = startingPosition + new Vector2(UnityEngine.Random.Range(-rectangleWidth/2, rectangleWidth/2), UnityEngine.Random.Range(-rectangleHeight/2, rectangleHeight/2));
+}
+
+    private void FixedUpdate()
     {
-        Vector2 avgVelocity = Vector2.zero;
-        int count = 0;
+        UpdateNeighbors();
 
-        foreach (FishAI neighbor in neighbors)
+        Vector2 alignment = CalculateAlignment() * alignmentWeight;
+        Vector2 cohesion = CalculateCohesion() * cohesionWeight;
+        Vector2 separation = CalculateSeparation() * separationWeight;
+        Vector2 wander = GetWanderDirection() * wanderWeight;
+
+        Vector2 direction = alignment + cohesion + separation + wander;
+
+        if (direction != Vector2.zero)
         {
-            float distance = Vector2.Distance(transform.position, neighbor.transform.position);
-            if (distance < neighborRadius)
-            {
-                avgVelocity += neighbor.rb.velocity;
-                count++;
-            }
+            rb.velocity = direction.normalized * speed;
         }
 
-        if (count > 0)
-        {
-            avgVelocity /= count;
-            return avgVelocity.normalized * speed;
-        }
+        // Clamp the fish's velocity
 
-        return Vector2.zero;
-    }
+        // If the fish is close enough to the target position, choose a new random target position
+        // if (targetPosition == Vector2.zero || Vector2.Distance(transform.position, targetPosition) < 0.1f)
+        // {
+        //     GetNewTargetPosition();
+        // }
 
-    private void UpdateNeighbors()
-    {
-        neighbors.Clear();
-        Collider2D[] nearbyObjects = Physics2D.OverlapCircleAll(transform.position, neighborRadius);
+        // // Calculate the direction vector and normalize it
+        // Vector2 direction = (targetPosition - (Vector2)transform.position).normalized;
 
-        foreach (Collider2D nearbyObject in nearbyObjects)
-        {
-            FishAI fishAI = nearbyObject.GetComponent<FishAI>();
-            if (fishAI != null && fishAI != this)
-            {
-                neighbors.Add(fishAI);
-            }
-        }
+        // Set the velocity
+        // rb.velocity = direction * speed;
+
+        //set the rotation
+        // Rotate the fish in the direction of its velocity
+        float angle = Mathf.Atan2(rb.velocity.y, rb.velocity.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+
+        // Flip the fish if it is upside down
+        FlipFishIfUpsideDown();
     }
 
     private Vector2 GetFishTopDirection()
@@ -157,98 +139,25 @@ public class FishAI : MonoBehaviour
         }
     }
 
-    void Update()
+
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (isInWater)
-        {
-            UpdateNeighbors();
-
-            Vector2 separationForce = Separation() * separationWeight;
-            Vector2 cohesionForce = Cohesion() * cohesionWeight;
-            Vector2 alignmentForce = Alignment() * alignmentWeight;
-            Vector2 wanderForce = Wander() * wanderWeight;
-
-            Vector2 totalForce = separationForce + cohesionForce + alignmentForce + wanderForce;
-            rb.velocity += totalForce * Time.deltaTime;
-
-            // Clamp the fish's velocity
-            if (rb.velocity.magnitude > speed)
-            {
-                rb.velocity = rb.velocity.normalized * speed;
-            }
-
-            // Rotate the fish in the direction of its velocity
-            float angle = Mathf.Atan2(rb.velocity.y, rb.velocity.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
-        }
-
-        FlipFishIfUpsideDown();
-    }
-
-
-    private Vector2 GetRandomWanderTarget()
-    {
-        float randomAngle = UnityEngine.Random.Range(0, 360) * Mathf.Deg2Rad;
-        Vector2 randomDirection = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle));
-        Vector2 randomTarget = (Vector2)transform.position + randomDirection * wanderRadius;
-        return randomTarget;
-    }
-
-    private Vector2 Wander()
-    {
-        if (Vector2.Distance(transform.position, wanderTarget) < 0.5f)
-        {
-            wanderTarget = GetRandomWanderTarget();
-        }
-
-        Vector2 desiredVelocity = (wanderTarget - (Vector2)transform.position).normalized * speed;
-        return desiredVelocity - rb.velocity;
-    }
-
-    private IEnumerator ReverseDirectionAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        rb.velocity = -rb.velocity;
-    }
-
-    public bool IsHooked
-    {
-        get { return isHooked; }
-    }
-
-
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (((1 << other.gameObject.layer) & waterLayer) != 0)
-        {
-            isInWater = false;
-            // Reverses the fish's direction after a delay
-            StartCoroutine(ReverseDirectionAfterDelay(reverseDirectionDelay));
-        }
-    }
-
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (((1 << other.gameObject.layer) & waterLayer) != 0)
-        {
-            isInWater = true;
-        }
-
-        if (((1 << other.gameObject.layer) & hookLayer) != 0 && other.gameObject.transform.childCount == 1)
+        if (((1 << collision.gameObject.layer) & hookLayer) != 0 && collision.gameObject.transform.childCount == 1)
         {
             // Hook the fish
-            transform.SetParent(other.transform);
+            transform.SetParent(collision.transform);
             rb.isKinematic = true;
             isHooked = true;
-            // Disable the FishAI script when hooked
             this.enabled = false;
-            //transform.position = other.transform.position;
+            HookController.hookRetracted.AddListener(OnHookRetracted);
 
-            // Invoke the FishHooked event
-            FishHooked?.Invoke(this);
         }
+    }
+
+    private void OnHookRetracted()
+    {
+        HookController.hookRetracted.RemoveListener(OnHookRetracted);
+        FishHooked?.Invoke(this);
     }
 
     public void Reinitialize()
@@ -258,10 +167,80 @@ public class FishAI : MonoBehaviour
         rb.isKinematic = false;
     }
 
-    public Vector2 StartingPosition
+    private void UpdateNeighbors()
     {
-        get { return startingPosition; }
+        neighbours.Clear();
+        Collider2D[] nearbyObjects = Physics2D.OverlapCircleAll(transform.position, neighbourRadius);
+
+        foreach (Collider2D nearbyObject in nearbyObjects)
+        {
+            FishAI fishAI = nearbyObject.GetComponent<FishAI>();
+            if (fishAI != null && fishAI != this)
+            {
+                neighbours.Add(fishAI);
+            }
+        }
     }
 
+    private Vector2 CalculateAlignment()
+    {
+        if (neighbours.Count == 0) return rb.velocity;
+        Vector2 alignment = Vector2.zero;
+        foreach (FishAI neighbour in neighbours)
+        {
+            alignment += (Vector2)neighbour.rb.velocity;
+        }
+        return alignment / neighbours.Count;
+    }
 
+    private Vector2 CalculateCohesion()
+    {
+        if (neighbours.Count == 0) return Vector2.zero;
+        Vector2 cohesion = Vector2.zero;
+        foreach (FishAI neighbour in neighbours)
+        {
+            cohesion += (Vector2)neighbour.transform.position;
+        }
+        cohesion /= neighbours.Count;
+        return (cohesion - (Vector2)transform.position).normalized;
+    }
+
+    private Vector2 CalculateSeparation()
+    {
+        Vector2 steer = Vector2.zero;
+        int count = 0;
+
+        foreach (FishAI neighbour in neighbours)
+        {
+            float distance = Vector2.Distance(transform.position, neighbour.transform.position);
+            if (distance < neighbourRadius)
+            {
+                Vector2 direction = (Vector2)(transform.position - neighbour.transform.position);
+                steer += direction.normalized / distance;
+                count++;
+            }
+        }
+
+        if (count > 0)
+        {
+            steer /= count;
+        }
+
+        if (steer.magnitude > speed)
+        {
+            steer = steer.normalized * speed;
+        }
+
+        return steer;
+    }
+
+    private Vector2 GetWanderDirection()
+    {
+        if (targetPosition == Vector2.zero || Vector2.Distance(transform.position, targetPosition) < 0.1f)
+        {
+            GetNewTargetPosition();
+        }
+
+        return (targetPosition - (Vector2)transform.position).normalized;
+    }
 }

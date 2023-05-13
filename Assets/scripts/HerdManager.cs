@@ -4,83 +4,42 @@ using UnityEngine;
 
 public class HerdManager : MonoBehaviour
 {
-    public float hookCheckRadius = 10f;
-    public LayerMask hookLayer;
+    
+    public List<FishAI> allFish = new();
+    [SerializeField]
+    private float respawnDelay = 5f;
 
-    private List<FishAI> fishes;
-
-    private FishAI hookedFish;
 
     private void Start()
     {
-        fishes = new List<FishAI>(GetComponentsInChildren<FishAI>());
-
-        foreach (var fish in fishes)
+        for (int i = 0; i < transform.childCount; i++)
         {
+            FishAI fish = transform.GetChild(i).GetComponent<FishAI>();
+            allFish.Add(fish);
             fish.FishHooked += OnFishHooked;
-        }
 
-        HookController.hookRetracted.AddListener(OnHookRetracted);
+        }
+    }
+
+
+    private void FixedUpdate()
+    {
+        allFish.ForEach((fish) => fish.CheckForHook());
     }
 
     private void OnFishHooked(FishAI fish)
     {
-        hookedFish = fish;
+        fish.gameObject.SetActive(false);
+        fish.transform.SetParent(transform);
+        StartCoroutine(RespawnFish(fish));
     }
 
-    private void OnHookRetracted()
+    private IEnumerator RespawnFish(FishAI fish)
     {
-        if (hookedFish != null)
-        {
 
-            hookedFish.gameObject.SetActive(false);
-            hookedFish.transform.SetParent(transform);
-            StartCoroutine(RespawnFish(hookedFish, 5f));
-            hookedFish = null;
-        }
-    }
-
-    private IEnumerator RespawnFish(FishAI fish, float delay)
-    {
-        yield return new WaitForSeconds(delay);
+        yield return new WaitForSeconds(respawnDelay);
         fish.gameObject.SetActive(true);
-        fish.transform.position = fish.StartingPosition;
+        fish.transform.position = fish.startingPosition;
         fish.Reinitialize();
-    }
-
-    private void FixedUpdate()
-    {
-        foreach (var fish in fishes)
-        {
-            // Check if hook is nearby
-            Collider2D nearbyHook = Physics2D.OverlapCircle(fish.transform.position, hookCheckRadius, hookLayer);
-            bool isHookNearby = nearbyHook != null;
-
-            // Disable fish if hook isn't close or fish is hooked
-            if (!isHookNearby)
-            {
-                DisableFish(fish);
-            }
-            else if (!fish.IsHooked)
-            {
-                EnableFish(fish);
-            }
-        }
-    }
-
-    private void DisableFish(FishAI fish)
-    {
-        if (fish.gameObject.activeSelf)
-        {
-            fish.gameObject.SetActive(false);
-        }
-    }
-
-    private void EnableFish(FishAI fish)
-    {
-        if (!fish.gameObject.activeSelf)
-        {
-            fish.gameObject.SetActive(true);
-        }
     }
 }
