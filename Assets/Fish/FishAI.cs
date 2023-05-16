@@ -39,9 +39,6 @@ public class FishAI : MonoBehaviour
 
 
 
-
-
-
     private Rigidbody2D rb;
     void Start()
     {
@@ -142,10 +139,12 @@ public class FishAI : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (((1 << collision.gameObject.layer) & hookLayer) != 0 && collision.gameObject.transform.childCount == 1)
+        if (!isHooked && ((1 << collision.gameObject.layer) & hookLayer) != 0 && collision.gameObject.transform.childCount == 1)
         {
             // Hook the fish
             transform.SetParent(collision.transform);
+            rb.velocity = Vector2.zero;
+            rb.angularVelocity = 0;
             rb.isKinematic = true;
             isHooked = true;
             this.enabled = false;

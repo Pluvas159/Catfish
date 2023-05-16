@@ -8,15 +8,16 @@ public class ThrowForceIndicator : MonoBehaviour
     public Slider forceSlider;
     private float force = 0f;
     private bool isIncreasing = false;
-
     private Image fillImage;
     private Gradient gradient;
 
+    private float increaseSpeed; // Increasing speed
+    public float twitchiness = 0.01f; // How much the force twitches
+    
+
     private void Start()
     {
-        // Hide the slider at start
-        //forceSlider.gameObject.SetActive(false);
-
+        increaseSpeed = Random.Range(1f, 2f);
         // Get the Image component of the Fill
         fillImage = forceSlider.fillRect.GetComponent<Image>();
 
@@ -37,26 +38,17 @@ public class ThrowForceIndicator : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            // Show the slider when Space is first pressed
-            //forceSlider.gameObject.SetActive(true);
-            isIncreasing = true;
-        }
-        else if (Input.GetKeyUp(KeyCode.Space))
-        {
-            // Hide the slider when Space is released
-            //forceSlider.gameObject.SetActive(false);
-            isIncreasing = false;
-            // Call the method to throw the hook here with force as a parameter
-            // For example: cat.ThrowHook(force);
-            force = 0f;
-        }
-
         if (isIncreasing)
         {
-            force += Time.deltaTime / 10; // Increase the force over time
-            if (force > 1f) force = 1f; // Don't let the force go over 1
+            // make the force go up and down
+            force += increaseSpeed * Time.deltaTime;
+            if (force > 1f)
+            {
+                increaseSpeed = - Random.Range(1, 10f);
+            } else if (force < 0f)
+            {
+                increaseSpeed = Random.Range(1, 10f);
+            }
         }
 
         forceSlider.value = force; // Update the slider
@@ -64,4 +56,32 @@ public class ThrowForceIndicator : MonoBehaviour
         // Change the fill color based on the gradient
         fillImage.color = gradient.Evaluate(force);
     }
+
+    public void SetActive(bool active)
+    {
+        forceSlider.gameObject.SetActive(active);
+        if (!active)
+        {
+            // Reset the force when the indicator is deactivated
+            force = 0f;
+            isIncreasing = false;
+        }
+    }
+
+    public void IsIncreasing(bool increasing)
+    {
+        isIncreasing = increasing;
+    }
+
+    public void SetPosition(Vector2 position)
+    {
+        // Set the position of the UI element
+        transform.position = position;
+    }
+
+    public float value
+    {
+        get { return forceSlider.value; }
+    }
+
 }

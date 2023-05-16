@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-
+using Cinemachine;
 public class HookController : MonoBehaviour
 {
     private Rigidbody2D hookRigidbody;
@@ -9,7 +9,6 @@ public class HookController : MonoBehaviour
     private bool isRetracting;
     private bool isThrown;
     private bool isStalling;
-    private bool inOriginalPosition;
     private Vector3 originalPosition;
     private Vector3 retractPosition;
     private float waterLevel;
@@ -21,10 +20,14 @@ public class HookController : MonoBehaviour
     private float rotationSpeed = 5f;
     private SpriteRenderer spriteRenderer;
 
+    private CinemachineImpulseSource impulseSource;
+
 
     public static UnityEvent hookInWater = new();
     public static UnityEvent hookThrown = new();
     public static UnityEvent hookRetracted = new();
+
+
 
     public void Start()
     {
@@ -32,21 +35,19 @@ public class HookController : MonoBehaviour
         isRetracting = false;
         isThrown = false;
         isStalling = false;
-        inOriginalPosition = true;
         hookRigidbody = GetComponent<Rigidbody2D>();
         originalPosition = transform.position;
         lightChild = transform.GetChild(0).gameObject;
         lightChild.SetActive(false);
-        AnimationController.animationEnd.AddListener(ThrowHook);
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.enabled = false;
+        impulseSource = GetComponent<CinemachineImpulseSource>();
     }
     public void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (inOriginalPosition) ThrowAnimation();
-            else if (isRetracting)
+            if (isRetracting)
             {
                 isStalling = true;
             }
@@ -56,7 +57,7 @@ public class HookController : MonoBehaviour
             if (isStalling) isStalling = false;
         }
 
-        if (isRetracting && !isStalling)
+        if (isRetracting && !isStalling && isInWater)
         {
             float horizontalInput = Input.GetAxis("Horizontal");
             float sideMovementSpeed = 10.0f; // You can adjust this value or make it a serialized field to set it in the Inspector
@@ -67,7 +68,7 @@ public class HookController : MonoBehaviour
             {
                 isInWater = false;
                 lightChild.SetActive(false);
-                isRetracting = false;
+                isRetracting = true;
                 hookInWater.Invoke();
             }
         }
@@ -86,33 +87,27 @@ public class HookController : MonoBehaviour
             }
 
         }
-        else if (!isThrown && !inOriginalPosition)
+        else if (isRetracting)
         {
             transform.position = Vector2.MoveTowards(transform.position, originalPosition, retractSpeed * Time.deltaTime );
             if (transform.position == originalPosition)
             {
                 hookRigidbody.gravityScale = 0;
-                inOriginalPosition = true;
                 hookRetracted.Invoke();
                 spriteRenderer.enabled = false;
+                isRetracting = false;
             }
         }
         UpdateHookRotation();
     }
 
-    public void ThrowHook()
+    public void ThrowHook(float value)
     {
         spriteRenderer.enabled = true;
         hookRigidbody.isKinematic = false;
         hookRigidbody.gravityScale = 1;
-        hookRigidbody.AddForce(10 * hookRigidbody.mass * new Vector2(1,1), ForceMode2D.Impulse);
+        hookRigidbody.AddForce(value * 20 * new Vector2(1,1), ForceMode2D.Impulse);
         isThrown = true;
-        inOriginalPosition = false;
-    }
-
-    public void ThrowAnimation()
-    {
-        hookThrown.Invoke();
     }
 
     private void UpdateHookRotation()
@@ -143,8 +138,6 @@ public class HookController : MonoBehaviour
 
 
 
-
-
     public void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("water") && !isInWater )
@@ -157,6 +150,7 @@ public class HookController : MonoBehaviour
             hookRigidbody.gravityScale = -1/hookEffectivity;
             hookRigidbody.velocity = new Vector2(0, hookRigidbody.velocity.y);
             hookInWater.Invoke();
+            CameraShakeManager.instance.CameraShake(impulseSource);
         }
     }
 }
