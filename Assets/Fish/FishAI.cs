@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Cinemachine;
 
 public class FishAI : MonoBehaviour
 {
@@ -34,6 +35,13 @@ public class FishAI : MonoBehaviour
 
     private bool dead = false;
 
+    [SerializeField]
+    private float requiredHookEffectivity = 1f;
+
+    [SerializeField]
+    private int neededNumberOfSpaces = 10;
+    private int currentNumberOfSpaces = 0;
+
     [SerializeField] private float neighbourRadius = 5f;
     [SerializeField] private float separationWeight = 1.5f;
     [SerializeField] private float alignmentWeight = 1f;
@@ -48,12 +56,15 @@ public class FishAI : MonoBehaviour
 
 
     private Rigidbody2D rb;
+
+    private CinemachineImpulseSource impulseSource;
     void Start()
     {
         herdManager = GetComponentInParent<HerdManager>();
         startingPosition = transform.position;
         targetPosition = Vector2.zero;
         rb = GetComponent<Rigidbody2D>();
+        impulseSource = GetComponent<CinemachineImpulseSource>();
     }
 
     private bool IsHookNearby()
@@ -86,18 +97,31 @@ public class FishAI : MonoBehaviour
         targetPosition = startingPosition + new Vector2(UnityEngine.Random.Range(-rectangleWidth / 2, rectangleWidth / 2), UnityEngine.Random.Range(-rectangleHeight / 2, rectangleHeight / 2));
     }
 
-    private void Update(){
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Space) && isHooked && !dead)
+        {
+            currentNumberOfSpaces++;
+            CameraShakeManager.instance.CameraShake(impulseSource);
+            if (currentNumberOfSpaces >= neededNumberOfSpaces) {
+                timeToDeathCounter = timeToDeath;
+            }
+        }
+
         if (isHooked && !dead)
         {
             timeToDeathCounter += Time.deltaTime;
             if (timeToDeathCounter >= timeToDeath)
             {
-                dead = true;
-                rb.velocity = Vector2.zero;
-                rb.angularVelocity = 0f;
-                hookController.enabled = true;
-                rb.isKinematic = true;
-                transform.SetParent(hook);
+                if (currentNumberOfSpaces >= neededNumberOfSpaces) {
+                    dead = true;
+                    rb.velocity = Vector2.zero;
+                    rb.angularVelocity = 0f;
+                    hookController.enabled = true;
+                    rb.isKinematic = true;
+                    transform.SetParent(hook);
+                }
+                else {hookController.enabled = true; isHooked = false; }
             }
         }
     }
@@ -112,7 +136,7 @@ public class FishAI : MonoBehaviour
 
             if (direction != Vector2.zero && !dead)
             {
-                rb.velocity = direction.normalized * speed;
+                rb.velocity = direction.normalized * speed * 3f;
                 hook.position = transform.position;
             }
         }
@@ -137,6 +161,17 @@ public class FishAI : MonoBehaviour
 
     private void Rotate()
     {
+        if (dead)
+        {
+            Vector3 hookRotation = hook.rotation.eulerAngles;
+
+            // Add 90 degrees to the z-axis rotation
+            hookRotation.z += 90;
+
+            // Set the transform's rotation to the new rotation
+            transform.rotation = Quaternion.Euler(hookRotation);
+            return;
+        }
         // Get the angle of the velocity vector in radians
         float angle = Mathf.Atan2(rb.velocity.y, rb.velocity.x);
 
@@ -172,15 +207,20 @@ public class FishAI : MonoBehaviour
         if (!isHooked && ((1 << collision.gameObject.layer) & hookLayer) != 0 && collision.gameObject.transform.childCount == 1)
         {
             // Hook the fish
-            
+
             hookController = collision.gameObject.GetComponent<HookController>();
+            if (hookController.GetHookEffectivity() < requiredHookEffectivity || !hookController.enabled)
+            {
+                return;
+            }
             hookController.enabled = false;
             hook = collision.transform;
             rb.velocity = Vector2.zero;
             rb.angularVelocity = 0;
             isHooked = true;
             HookController.hookRetracted.AddListener(OnHookRetracted);
-
+            direction = new Vector2(UnityEngine.Random.Range(-1f, 1f), -1f);
+            currentNumberOfSpaces = 0;
         }
     }
 
@@ -197,6 +237,7 @@ public class FishAI : MonoBehaviour
         rb.isKinematic = false;
         dead = false;
         timeToDeathCounter = 0f;
+        currentNumberOfSpaces = 0;
     }
 
     private void UpdateNeighbors()

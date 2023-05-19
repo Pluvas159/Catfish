@@ -47,7 +47,7 @@ public class HookController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (isRetracting)
+            if (isRetracting && transform.childCount < 2)
             {
                 isStalling = true;
             }
@@ -134,6 +134,11 @@ public class HookController : MonoBehaviour
 
         // Rotate the hook using Lerp and rotation speed
         transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+    }
+
+    public float GetHookEffectivity()
+    {
+        return hookEffectivity;
     }
 
 
