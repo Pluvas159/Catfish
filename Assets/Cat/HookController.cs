@@ -8,7 +8,7 @@ public class HookController : MonoBehaviour
     public static bool isInWater;
     private bool isRetracting;
     private bool isThrown;
-    private bool isStalling;
+    public bool isStalling { get; set; }
     private Vector3 originalPosition;
     private Vector3 retractPosition;
     private float waterLevel;
