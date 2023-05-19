@@ -656,10 +656,6 @@ PrefabInstance:
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 991959559863934151, guid: f6c46d1602376f544a9d769ba68bceb0, type: 3}
-      propertyPath: m_DefaultVelocity.y
-      value: -2
-      objectReference: {fileID: 0}
-    - target: {fileID: 991959559863934151, guid: f6c46d1602376f544a9d769ba68bceb0, type: 3}
       propertyPath: m_ImpulseDefinition.m_ImpulseDuration
       value: 1
       objectReference: {fileID: 0}

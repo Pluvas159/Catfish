@@ -52,9 +52,6 @@ public class FishAI : MonoBehaviour
     private List<FishAI> neighbours = new List<FishAI>();
     public event Action<FishAI> FishHooked = delegate { };
 
-
-
-
     private Rigidbody2D rb;
 
     private CinemachineImpulseSource impulseSource;
@@ -102,6 +99,7 @@ public class FishAI : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Space) && isHooked && !dead)
         {
             currentNumberOfSpaces++;
+            direction = new Vector2(UnityEngine.Random.Range(-1f, 1f), -1f);
             CameraShakeManager.instance.CameraShake(impulseSource);
             if (currentNumberOfSpaces >= neededNumberOfSpaces) {
                 timeToDeathCounter = timeToDeath;

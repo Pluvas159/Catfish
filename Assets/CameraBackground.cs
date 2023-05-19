@@ -9,9 +9,12 @@ public class CameraBackground : MonoBehaviour
     [SerializeField] private Sprite[] images;
     private int currentImageIndex = 1;
 
+    private float changeDelay = 1f;
+    private float changeDelayCounter = 0f;
+
     private void Start()
     {
-        HookController.hookInWater.AddListener(() => ChangeImage(Convert.ToInt32(!HookController.isInWater)));
+        HookController.hookInWater.AddListener(OnHookInWater);
         backgroundImage.transform.SetParent(targetCamera.transform);
         backgroundImage.transform.localPosition = new Vector3(0, 0, targetCamera.nearClipPlane + 0.01f);
         ScaleSpriteToScreen();
@@ -39,18 +42,30 @@ public class CameraBackground : MonoBehaviour
 
         backgroundImage.transform.localScale = scale;
     }
+    private void Update(){
+        if (changeDelayCounter < changeDelay)
+        {
+            changeDelayCounter += Time.deltaTime;
+        }
+    }
 
     private void OnHookInWater()
     {
-        if (currentImageIndex == 1)
+        if (changeDelayCounter < changeDelay)
+        {
+            return;
+        }
+
+        if (Convert.ToInt32(HookController.isInWater) == 1)
         {
             // Change image to 0 after 1 second
-            Invoke(nameof(ChangeImageToZero), 1f);
+            Invoke(nameof(ChangeImageToZero), 1);
         }
-        else
+        else if (Convert.ToInt32(HookController.isInWater) == 0)
         {
             ChangeImage(1);
         }
+        changeDelayCounter = 0f;
     }
 
     private void ChangeImageToZero()
