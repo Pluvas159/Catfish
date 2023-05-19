@@ -8,7 +8,7 @@ public class FishAI : MonoBehaviour
     [SerializeField]
     private float speed = 0.5f;
 
-    [SerializeField]
+[SerializeField]
     private float rectangleWidth = 50;
     [SerializeField]
     private float rectangleHeight = 20;
@@ -22,6 +22,8 @@ public class FishAI : MonoBehaviour
     public Vector2 startingPosition { get; set; }
     private Vector2 targetPosition;
     [SerializeField]
+    private LayerMask hook;
+    [SerializeField]
     private float hookCheckRadius = 100f;
 
     [SerializeField] private float neighbourRadius = 5f;
@@ -30,18 +32,12 @@ public class FishAI : MonoBehaviour
     [SerializeField] private float cohesionWeight = 1f;
     [SerializeField] private float wanderWeight = 1f;
 
-    public float hookedTimeUntilDeath = 3.0f;
-    private float hookedTimer = 0.0f;
-
-    private Transform hook;
-
-    private FixedJoint2D hookJoint;
-
-    private Vector2 direction;
-
-    private HerdManager herdManager;
-    private List<FishAI> neighbours = new List<FishAI>();
+     private HerdManager herdManager;
+     private List<FishAI> neighbours = new List<FishAI>();
     public event Action<FishAI> FishHooked = delegate { };
+
+
+
 
     private Rigidbody2D rb;
     void Start()
@@ -78,36 +74,12 @@ public class FishAI : MonoBehaviour
     }
 
     private void GetNewTargetPosition()
-    {
-        targetPosition = startingPosition + new Vector2(UnityEngine.Random.Range(-rectangleWidth / 2, rectangleWidth / 2), UnityEngine.Random.Range(-rectangleHeight / 2, rectangleHeight / 2));
-    }
-
-
-    private void Update() {
-        if (isHooked) {
-            hookedTimer += Time.deltaTime;
-            if (hookedTimer >= hookedTimeUntilDeath) {
-                direction = Vector2.zero;
-                rb.velocity = Vector2.zero;
-                rb.angularVelocity = 0;
-            }
-        }
-    }
+{
+    targetPosition = startingPosition + new Vector2(UnityEngine.Random.Range(-rectangleWidth/2, rectangleWidth/2), UnityEngine.Random.Range(-rectangleHeight/2, rectangleHeight/2));
+}
 
     private void FixedUpdate()
     {
-        if (direction != Vector2.zero)
-        {
-            rb.velocity = direction.normalized * speed;
-            RotateFish();
-        }
-        // Flip the fish if it is upside down
-        FlipFishIfUpsideDown();
-
-        if (isHooked) { 
-            //rb.velocity *= 4f;
-            return;
-        }
         UpdateNeighbors();
 
         Vector2 alignment = CalculateAlignment() * alignmentWeight;
@@ -115,12 +87,34 @@ public class FishAI : MonoBehaviour
         Vector2 separation = CalculateSeparation() * separationWeight;
         Vector2 wander = GetWanderDirection() * wanderWeight;
 
-        direction = alignment + cohesion + separation + wander;
-    }
+        Vector2 direction = alignment + cohesion + separation + wander;
 
-    private void RotateFish() {
+        if (direction != Vector2.zero)
+        {
+            rb.velocity = direction.normalized * speed;
+        }
+
+        // Clamp the fish's velocity
+
+        // If the fish is close enough to the target position, choose a new random target position
+        // if (targetPosition == Vector2.zero || Vector2.Distance(transform.position, targetPosition) < 0.1f)
+        // {
+        //     GetNewTargetPosition();
+        // }
+
+        // // Calculate the direction vector and normalize it
+        // Vector2 direction = (targetPosition - (Vector2)transform.position).normalized;
+
+        // Set the velocity
+        // rb.velocity = direction * speed;
+
+        //set the rotation
+        // Rotate the fish in the direction of its velocity
         float angle = Mathf.Atan2(rb.velocity.y, rb.velocity.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+
+        // Flip the fish if it is upside down
+        FlipFishIfUpsideDown();
     }
 
     private Vector2 GetFishTopDirection()
@@ -145,33 +139,17 @@ public class FishAI : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // if (!isHooked && ((1 << collision.gameObject.layer) & hookLayer) != 0 && collision.gameObject.transform.childCount == 1)
-        // {
-        //     // Hook the fish
-        //     transform.SetParent(collision.transform);
-        //     rb.velocity = Vector2.zero;
-        //     rb.angularVelocity = 0;
-        //     rb.isKinematic = false;
-        //     isHooked = true;
-        //     HookController.hookRetracted.AddListener(OnHookRetracted);
-        // }
-        if (collision.gameObject.layer == LayerMask.NameToLayer("hook") && !isHooked && collision.gameObject.transform.childCount == 1)
+        if (!isHooked && ((1 << collision.gameObject.layer) & hookLayer) != 0 && collision.gameObject.transform.childCount == 1)
         {
+            // Hook the fish
+            transform.SetParent(collision.transform);
+            rb.velocity = Vector2.zero;
+            rb.angularVelocity = 0;
+            rb.isKinematic = true;
             isHooked = true;
-            hook = collision.transform;
-            transform.SetParent(hook);
-            Rigidbody2D hookRb = collision.gameObject.GetComponent<Rigidbody2D>();
-
-            // Create a joint between the fish and the hook
-            hookJoint = gameObject.AddComponent<FixedJoint2D>();
-            hookJoint.connectedBody = hookRb;
-             rb.angularVelocity = 0;
-
-            // Get direction to swim away. This could be a random direction, away from the hook, etc.
-            // In this case, it just swims directly away from the point it got hooked.
-            //direction = (transform.position - hook.position).normalized;
-            direction = Vector2.down;
+            this.enabled = false;
             HookController.hookRetracted.AddListener(OnHookRetracted);
+
         }
     }
 
@@ -183,8 +161,8 @@ public class FishAI : MonoBehaviour
 
     public void Reinitialize()
     {
-        Destroy(hookJoint);
         isHooked = false;
+        this.enabled = true;
         rb.isKinematic = false;
     }
 

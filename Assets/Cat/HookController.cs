@@ -18,7 +18,6 @@ public class HookController : MonoBehaviour
     private float retractSpeed;
     private GameObject lightChild;
     private float rotationSpeed = 5f;
-    public float sideMovementSpeed = 0.1f;
     private SpriteRenderer spriteRenderer;
 
     private CinemachineImpulseSource impulseSource;
@@ -61,24 +60,12 @@ public class HookController : MonoBehaviour
         if (isRetracting && !isStalling && isInWater)
         {
             float horizontalInput = Input.GetAxis("Horizontal");
-
-            // Apply horizontal force
-            Vector2 force = new Vector2(horizontalInput * sideMovementSpeed, 0);
-
-            // Retract to the position
-            Vector2 toRetractPos = retractPosition - transform.position;
-            float distance = toRetractPos.magnitude;
-            if (distance > 0.1f)
+            float sideMovementSpeed = 10.0f; // You can adjust this value or make it a serialized field to set it in the Inspector
+            Vector3 newPosition = transform.position + new Vector3(horizontalInput * sideMovementSpeed * Time.deltaTime, 0, 0);
+            newPosition = Vector2.MoveTowards(newPosition, retractPosition, retractSpeed * Time.deltaTime);
+            transform.position = newPosition;
+            if (transform.position == retractPosition)
             {
-                Vector2 direction = toRetractPos + hookRigidbody.velocity;
-                hookRigidbody.velocity = direction.normalized * retractSpeed;
-                hookRigidbody.AddForce(force, ForceMode2D.Impulse);
-            }
-            else
-            {
-                hookRigidbody.velocity = Vector2.zero;  // Stop the object
-                hookRigidbody.position = retractPosition;  // Snap to the target position
-
                 isInWater = false;
                 lightChild.SetActive(false);
                 isRetracting = true;
@@ -95,15 +82,14 @@ public class HookController : MonoBehaviour
             if (hookRigidbody.velocity.y >= 0 && !isRetracting)
             {
                 hookRigidbody.velocity = Vector2.zero;
-                hookRigidbody.isKinematic = false;
-                hookRigidbody.gravityScale = 0;
+                hookRigidbody.isKinematic = true;
                 isRetracting = true;
             }
 
         }
         else if (isRetracting)
         {
-            transform.position = Vector2.MoveTowards(transform.position, originalPosition, retractSpeed * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, originalPosition, retractSpeed * Time.deltaTime );
             if (transform.position == originalPosition)
             {
                 hookRigidbody.gravityScale = 0;
@@ -112,7 +98,7 @@ public class HookController : MonoBehaviour
                 isRetracting = false;
             }
         }
-        //UpdateHookRotation();
+        UpdateHookRotation();
     }
 
     public void ThrowHook(float value)
@@ -120,7 +106,7 @@ public class HookController : MonoBehaviour
         spriteRenderer.enabled = true;
         hookRigidbody.isKinematic = false;
         hookRigidbody.gravityScale = 1;
-        hookRigidbody.AddForce(value * 20 * new Vector2(1, 1), ForceMode2D.Impulse);
+        hookRigidbody.AddForce(value * 20 * new Vector2(1,1), ForceMode2D.Impulse);
         isThrown = true;
     }
 
@@ -154,14 +140,14 @@ public class HookController : MonoBehaviour
 
     public void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("water") && !isInWater)
+        if (other.gameObject.CompareTag("water") && !isInWater )
         {
             isInWater = true;
             lightChild.SetActive(true);
             isThrown = false;
             waterLevel = transform.position.y;
             retractPosition = new Vector3(originalPosition.x, waterLevel, 0);
-            hookRigidbody.gravityScale = -1 / hookEffectivity;
+            hookRigidbody.gravityScale = -1/hookEffectivity;
             hookRigidbody.velocity = new Vector2(0, hookRigidbody.velocity.y);
             hookInWater.Invoke();
             CameraShakeManager.instance.CameraShake(impulseSource);
