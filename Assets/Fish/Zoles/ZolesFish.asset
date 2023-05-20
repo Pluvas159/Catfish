@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 665270365935f5643a70a7bab72af0c6, type: 3}
+  m_Name: ZolesFish
+  m_EditorClassIdentifier: 
+  fishName: Zoles
+  fishSprites:
+  - {fileID: 1374220113, guid: f4790b9b11ee09b4d84071aab463e35d, type: 3}
+  - {fileID: -2109145424, guid: f4790b9b11ee09b4d84071aab463e35d, type: 3}
+  - {fileID: 1385707296, guid: f4790b9b11ee09b4d84071aab463e35d, type: 3}
+  inventoryItem: {fileID: 11400000, guid: 62d58c1a9bbb03d468dc738fcdbc975f, type: 2}
+  price: 4

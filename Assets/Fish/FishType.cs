@@ -6,4 +6,5 @@ public class FishType : ScriptableObject
     public string fishName;
     public Sprite[] fishSprites;
     public InventoryItem inventoryItem;
+    public int price;
 }

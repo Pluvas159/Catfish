@@ -5,11 +5,26 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController instance;
     private GameObject hook;
     private HookController hookController;
     private bool inOriginalPosition = true;
+
+    public int stars;
     
     public ThrowForceIndicator throwForceIndicator;  // The main camera
+
+    public void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Debug.LogError("Multiple PlayerControllers in scene");
+        }
+    }
 
     // Start is called before the first frame update
     void Start()

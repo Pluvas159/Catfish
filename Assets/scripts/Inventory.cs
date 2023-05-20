@@ -6,14 +6,26 @@ using UnityEngine.UI;
 
 public class Inventory : MonoBehaviour
 {
-    public Dictionary<InventoryItem, int> items = new Dictionary<InventoryItem, int>();
+    public static Inventory instance;
+    public Dictionary<FishType, int> items = new Dictionary<FishType, int>();
     public GameObject slotPrefab;
     public Transform slotContainer;
 
-    public InventoryItem testItem;
+    public FishType testItem;
 
     public int testItemCount = 1;
 
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Debug.LogError("Multiple Inventory in scene");
+        }
+    }
 
 
     private void Start()
@@ -23,9 +35,10 @@ public class Inventory : MonoBehaviour
         {
             AddItem(testItem);
         }
+        FishAI.FishHooked += OnFishHooked;
     }
 
-    public void AddItem(InventoryItem item)
+    public void AddItem(FishType item)
     {
         if (items.ContainsKey(item))
         {
@@ -38,7 +51,7 @@ public class Inventory : MonoBehaviour
         UpdateUI();
     }
 
-    public void RemoveItem(InventoryItem item)
+    public void RemoveItem(FishType item)
     {
         if (items.ContainsKey(item))
         {
@@ -73,10 +86,33 @@ public class Inventory : MonoBehaviour
             var slot = slotContainer.GetChild(index).gameObject;
             slot.SetActive(true);
             var image = slot.GetComponentInChildren<Image>();
-            image.sprite = pair.Key.icon;
+            image.sprite = pair.Key.inventoryItem.icon;
             var text = slot.GetComponentInChildren<TextMeshProUGUI>();
             text.text = pair.Value.ToString();
+
+            var button = slot.GetComponent<Button>();
+            button.onClick.RemoveAllListeners();
+            button.onClick.AddListener(() => SellFish(pair.Key));
             index++;
         }
+    }
+
+    private void OnFishHooked(FishAI fish)
+    {
+        AddItem(fish.GetFishType());
+    }
+
+    public void SellFish(FishType item){
+        if (items.ContainsKey(item))
+        {
+            items[item]--;
+            GameManager.instance.AddStars(item.price);
+            if (items[item] <= 0)
+            {
+                items.Remove(item);
+            }
+        }
+        UpdateUI();
+
     }
 }

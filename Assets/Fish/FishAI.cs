@@ -50,7 +50,10 @@ public class FishAI : MonoBehaviour
 
     private HerdManager herdManager;
     private List<FishAI> neighbours = new List<FishAI>();
-    public event Action<FishAI> FishHooked = delegate { };
+    public static event Action<FishAI> FishHooked = delegate { };
+
+    [SerializeField]
+    private FishType fishType;
 
     private Rigidbody2D rb;
 
@@ -219,6 +222,8 @@ public class FishAI : MonoBehaviour
             HookController.hookRetracted.AddListener(OnHookRetracted);
             direction = new Vector2(UnityEngine.Random.Range(-1f, 1f), -1f);
             currentNumberOfSpaces = 0;
+            //change needed number of spaces based on hook effectivity, the higher the effectivity compared to the required effectivity, the less spaces are needed
+            neededNumberOfSpaces = Mathf.RoundToInt(requiredHookEffectivity / hookController.GetHookEffectivity() * 10f * requiredHookEffectivity);
         }
     }
 
@@ -313,5 +318,10 @@ public class FishAI : MonoBehaviour
         }
 
         return (targetPosition - (Vector2)transform.position).normalized;
+    }
+
+    public FishType GetFishType()
+    {
+        return fishType;
     }
 }

@@ -16,9 +16,8 @@ public class HerdManager : MonoBehaviour
         {
             FishAI fish = transform.GetChild(i).GetComponent<FishAI>();
             allFish.Add(fish);
-            fish.FishHooked += OnFishHooked;
-
         }
+        FishAI.FishHooked += OnFishHooked;
     }
 
 
