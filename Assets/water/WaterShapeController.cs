@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D;
 
-[ExecuteAlways]
 public class WaterShapeController : MonoBehaviour
 {
 
@@ -34,11 +33,9 @@ public class WaterShapeController : MonoBehaviour
     public float spread;
 
     void Start() { 
-       
-    }
-    void OnValidate() {
-        // Clean waterpoints 
-        StartCoroutine(CreateWaves());
+        //if not in editor
+            // Clean waterpoints 
+            StartCoroutine(CreateWaves());
     }
     IEnumerator CreateWaves() {
         foreach (Transform child in wavePoints.transform) {
@@ -56,10 +53,7 @@ public class WaterShapeController : MonoBehaviour
         Spline waterSpline = spriteShapeController.spline;
         int waterPointsCount = waterSpline.GetPointCount();
 
-        // Remove middle points for the waves
-        // Keep only the corners
-        // Removing 1 point at a time we can remove only the 1st point
-        // This means every time we remove 1st point the 2nd point becomes first
+
         for (int i = CorsnersCount; i < waterPointsCount - CorsnersCount; i++) {
             waterSpline.RemovePointAt(CorsnersCount);
         }
@@ -82,10 +76,6 @@ public class WaterShapeController : MonoBehaviour
 
         }
 
-
-        // loop through all the wave points
-        // plus the both top left and right corners
-        
         springs = new();
         for (int i = 0; i <= WavesCount+1; i++) {
             int index = i + 1; 
@@ -98,12 +88,8 @@ public class WaterShapeController : MonoBehaviour
             WaterSpring waterSpring = wavePoint.GetComponent<WaterSpring>();
             waterSpring.Init(spriteShapeController);
             springs.Add(waterSpring);
-
-            // WaveSpring waveSpring = wavePoint.GetComponent<WaveSpring>();
-            // waveSpring.Init(spriteShapeController);
         }
 
-        //Splash(5,1f);
     }
     private void Smoothen(Spline waterSpline, int index)
     {
@@ -131,6 +117,7 @@ public class WaterShapeController : MonoBehaviour
     }
     void FixedUpdate()
     {
+
         foreach(WaterSpring waterSpringComponent in springs) {
             waterSpringComponent.WaveSpringUpdate(springStiffness, dampening);
             waterSpringComponent.WavePointUpdate();

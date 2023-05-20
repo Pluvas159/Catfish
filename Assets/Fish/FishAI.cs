@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using Cinemachine;
 
 public class FishAI : MonoBehaviour
@@ -216,6 +215,7 @@ public class FishAI : MonoBehaviour
             }
             hookController.enabled = false;
             hook = collision.transform;
+            hook.gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
             rb.velocity = Vector2.zero;
             rb.angularVelocity = 0;
             isHooked = true;

@@ -24,8 +24,10 @@ public class HookController : MonoBehaviour
     [SerializeField]
     private HookType hookType;
 
+    private BoxCollider2D boxCollider;
 
-    public static UnityEvent hookInWater = new();
+
+    public static UnityEvent<bool> hookInWater = new();
     public static UnityEvent hookThrown = new();
     public static UnityEvent hookRetracted = new();
 
@@ -47,6 +49,8 @@ public class HookController : MonoBehaviour
         hookEffectivity = hookType.hookEffectivity;
         spriteRenderer.sprite = hookType.inventoryItem.icon;
         Shop.hookBought.AddListener(ChangeHookType);
+        boxCollider = GetComponent<BoxCollider2D>();
+        boxCollider.enabled = false;
     }
     public void Update()
     {
@@ -74,7 +78,7 @@ public class HookController : MonoBehaviour
                 isInWater = false;
                 lightChild.SetActive(false);
                 isRetracting = true;
-                hookInWater.Invoke();
+                hookInWater.Invoke(false);
             }
         }
     }
@@ -84,6 +88,7 @@ public class HookController : MonoBehaviour
     {
         if (isInWater)
         {
+            if (boxCollider.enabled) boxCollider.enabled = false;
             if (hookRigidbody.velocity.y >= 0 && !isRetracting)
             {
                 hookRigidbody.velocity = Vector2.zero;
@@ -113,6 +118,7 @@ public class HookController : MonoBehaviour
         hookRigidbody.gravityScale = 1;
         hookRigidbody.AddForce(value * 20 * new Vector2(1,1), ForceMode2D.Impulse);
         isThrown = true;
+        boxCollider.enabled = true;
     }
 
     private void UpdateHookRotation()
@@ -159,7 +165,7 @@ public class HookController : MonoBehaviour
             retractPosition = new Vector3(originalPosition.x, waterLevel, 0);
             hookRigidbody.gravityScale = -1/hookEffectivity;
             hookRigidbody.velocity = new Vector2(0, hookRigidbody.velocity.y);
-            hookInWater.Invoke();
+            hookInWater.Invoke(true);
             CameraShakeManager.instance.CameraShake(impulseSource);
         }
     }

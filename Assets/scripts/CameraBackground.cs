@@ -49,19 +49,19 @@ public class CameraBackground : MonoBehaviour
         }
     }
 
-    private void OnHookInWater()
+    private void OnHookInWater(bool inWater)
     {
         if (changeDelayCounter < changeDelay)
         {
             return;
         }
 
-        if (Convert.ToInt32(HookController.isInWater) == 1)
+        if (inWater)
         {
             // Change image to 0 after 1 second
             Invoke(nameof(ChangeImageToZero), 1);
         }
-        else if (Convert.ToInt32(HookController.isInWater) == 0)
+        else if (!inWater)
         {
             ChangeImage(1);
         }

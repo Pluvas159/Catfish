@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: DiamondHook
   m_EditorClassIdentifier: 
   inventoryItem: {fileID: 11400000, guid: 20f13a6af08d83e4d9b648075d63768c, type: 2}
-  hookEffectivity: 4.5
+  hookEffectivity: 5.5
