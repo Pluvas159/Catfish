@@ -18,7 +18,7 @@ public class FishAI : MonoBehaviour
     [SerializeField]
     private LayerMask hookLayer;
     private bool isInWater = true;
-    private bool isHooked = false;
+    public bool isHooked = false;
 
     private Vector2 direction;
     public Vector2 startingPosition { get; set; }
@@ -121,7 +121,8 @@ public class FishAI : MonoBehaviour
                     rb.isKinematic = true;
                     transform.SetParent(hook);
                 }
-                else {hookController.enabled = true; isHooked = false; }
+                else {
+                    hookController.enabled = true; isHooked = false; hook = null;HookController.hookRetracted.RemoveListener(OnHookRetracted);}
             }
         }
     }
@@ -222,6 +223,7 @@ public class FishAI : MonoBehaviour
             HookController.hookRetracted.AddListener(OnHookRetracted);
             direction = new Vector2(UnityEngine.Random.Range(-1f, 1f), -1f);
             currentNumberOfSpaces = 0;
+            timeToDeathCounter = 0f;
             //change needed number of spaces based on hook effectivity, the higher the effectivity compared to the required effectivity, the less spaces are needed
             neededNumberOfSpaces = Mathf.RoundToInt(requiredHookEffectivity / hookController.GetHookEffectivity() * 10f * requiredHookEffectivity);
         }

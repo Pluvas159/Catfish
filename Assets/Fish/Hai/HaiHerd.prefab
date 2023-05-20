@@ -121,6 +121,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
       objectReference: {fileID: 0}
@@ -194,6 +198,10 @@ PrefabInstance:
       propertyPath: fishType
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
@@ -269,6 +277,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
       objectReference: {fileID: 0}
@@ -342,6 +354,10 @@ PrefabInstance:
       propertyPath: fishType
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
@@ -417,6 +433,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
       objectReference: {fileID: 0}
@@ -490,6 +510,10 @@ PrefabInstance:
       propertyPath: fishType
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
@@ -565,6 +589,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
       objectReference: {fileID: 0}
@@ -638,6 +666,10 @@ PrefabInstance:
       propertyPath: fishType
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
@@ -713,6 +745,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
       objectReference: {fileID: 0}
@@ -786,6 +822,10 @@ PrefabInstance:
       propertyPath: fishType
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
@@ -861,6 +901,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
       objectReference: {fileID: 0}
@@ -934,6 +978,10 @@ PrefabInstance:
       propertyPath: fishType
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
@@ -1009,6 +1057,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
       objectReference: {fileID: 0}
@@ -1083,6 +1135,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
       objectReference: {fileID: 0}
@@ -1156,6 +1212,10 @@ PrefabInstance:
       propertyPath: fishType
       value: 
       objectReference: {fileID: 11400000, guid: e0fff8ae5ee715d47baac566459ea982, type: 2}
+    - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
+      propertyPath: hookCheckRadius
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 3067919296545342, guid: 08a9679f713f4c44da313d39e72074b4, type: 3}
       propertyPath: requiredHookEffectivity
       value: 3
